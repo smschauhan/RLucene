@@ -1,0 +1,9 @@
+Package: RLucene
+Version: 0.1-0
+Title: R/Lucene interface
+Author: Simon Urbanek <Simon.Urbanek@r-project.org>
+Maintainer: Simon Urbanek <Simon.Urbanek@r-project.org>
+Depends: rJava
+Description: R/Lucene interface - so far very rudimentary
+License: Apache-2.0
+URL: http://www.rforge.net/RLucene

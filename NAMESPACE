@@ -1,0 +1,8 @@
+export(add.document, update.document, delete.documents, lucene.writer, lucene.query, stored, not.stored)
+S3method(add.document, LuceneIndexWriter)
+S3method(update.document, LuceneIndexWriter)
+S3method(delete.documents, LuceneIndexWriter)
+S3method(add.document, character)
+S3method(update.document, character)
+S3method(delete.documents, character)
+S3method(close, LuceneIndexWriter)
