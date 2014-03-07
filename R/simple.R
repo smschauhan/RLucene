@@ -105,7 +105,7 @@ lucene.query <- function(directory, field, query, version=NA) {
   dir <-.jcall("org/apache/lucene/store/FSDirectory", "Lorg/apache/lucene/store/FSDirectory;", "open", .jnew("java/io/File", as.character(directory)[1L]))
   on.exit(.jcall(dir, "V", "close"))
   dr <- .jcall("org/apache/lucene/index/DirectoryReader", "Lorg/apache/lucene/index/DirectoryReader;", "open", .jcast(dir, "org/apache/lucene/store/Directory"))
-  on.exit(.jcall(dr, "V", "close"))
+  on.exit(.jcall(dr, "V", "close"), TRUE)
   s <- .jnew("org/apache/lucene/search/IndexSearcher", .jcast(dr, "org/apache/lucene/index/IndexReader"))
   qp <- .jnew("org.apache.lucene.queryparser.classic.QueryParser", version, as.character(field), .jcast(analyzer, "org/apache/lucene/analysis/Analyzer"))
   q <- .jcall(qp, "Lorg/apache/lucene/search/Query;", "parse", query)
