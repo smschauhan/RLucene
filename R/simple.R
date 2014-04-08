@@ -104,16 +104,53 @@ lucene.query <- function(directory, field, query, version=NA) {
   analyzer <- .jnew("org.apache.lucene.analysis.standard.StandardAnalyzer", version)
   dir <-.jcall("org/apache/lucene/store/FSDirectory", "Lorg/apache/lucene/store/FSDirectory;", "open", .jnew("java/io/File", as.character(directory)[1L]))
   on.exit(.jcall(dir, "V", "close"))
-  dr <- .jcall("org/apache/lucene/index/DirectoryReader", "Lorg/apache/lucene/index/DirectoryReader;", "open", .jcast(dir, "org/apache/lucene/store/Directory"))
+  dr <- .jcall("org/apache/lucene/index/DirectoryReader", "Lorg/apache/lucene/index/DirectoryReader;", "open", .jcast(dir, "org/apache/lucene/store/Directory"
+))
   on.exit(.jcall(dr, "V", "close"), TRUE)
   s <- .jnew("org/apache/lucene/search/IndexSearcher", .jcast(dr, "org/apache/lucene/index/IndexReader"))
-  qp <- .jnew("org.apache.lucene.queryparser.classic.QueryParser", version, as.character(field), .jcast(analyzer, "org/apache/lucene/analysis/Analyzer"))
+  a2 <- .jcast(analyzer, "org/apache/lucene/analysis/Analyzer")
+  qp <- .jnew("org.apache.lucene.queryparser.classic.QueryParser", version, as.character(field), a2 )
+  #Multifield QueryParser
+  #fields <- .jarray(c("content","description"))
+  #mf <- .jnew("org.apache.lucene.queryparser.classic.MultiFieldQueryParser",version , fields , a2)
+  #qmfp <- .jcast(mf, "org/apache/lucene/queryparser/classic/QueryParser")
+  #q <- .jcall(qmfp, "Lorg/apache/lucene/search/Query;", "parse", query)
   q <- .jcall(qp, "Lorg/apache/lucene/search/Query;", "parse", query)
   rset <- .jcall(s, "Lorg/apache/lucene/search/TopDocs;", "search", q, .jnull("org/apache/lucene/search/Filter"), 1000L)
   res <- .jfield(rset,,"scoreDocs")
+  t<- .jnew("org.apache.lucene.index.Term", as.character("content"),query )
+  tq <- .jnew("org.apache.lucene.search.TermQuery", t)
+  qq <- .jcast(tq, "org/apache/lucene/search/Query")
+  qs <- .jnew("org.apache.lucene.search.highlight.QueryScorer", qq, as.character("content"))
+  scorer <- .jcast(qs, "org/apache/lucene/search/highlight/Scorer")
+  shtml <- .jnew("org.apache.lucene.search.highlight.SimpleHTMLFormatter", "<b style='background:yellow'>", "</b>")
+  hl <- .jnew("org.apache.lucene.search.highlight.Highlighter", .jcast(shtml, "org/apache/lucene/search/highlight/Formatter"), scorer)
+  .jcall(hl,"V", "setMaxDocCharsToAnalyze", as.integer(900000000))
+  s_f <- .jnew("org.apache.lucene.search.highlight.SimpleSpanFragmenter",qs)
+  t_f <- .jcall(hl, "V", "setTextFragmenter", .jcast(s_f,"org/apache/lucene/search/highlight/Fragmenter"))
+  output <- list()
+  cont.string <- list()
+  if(length(res) != 0) {
+	for(i in 1:length(res)) {
+		document <- .jcall(s, "Lorg/apache/lucene/document/Document;", "doc", rset$scoreDocs[[i]]$doc)
+		content <- document$get("content")
+		reader <- .jcall(s, "Lorg/apache/lucene/index/IndexReader;", "getIndexReader")
+		tokensources <- .jnew("org.apache.lucene.search.highlight.TokenSources")
+		stream <- .jcall(tokensources, "Lorg/apache/lucene/analysis/TokenStream;", "getAnyTokenStream", reader, rset$scoreDocs[[i]]$doc, "content", document, a2)
+		tokenstream <- .jcast(stream , "org/apache/lucene/analysis/TokenStream")
+		frag <- .jcall(hl, "[Lorg/apache/lucene/search/highlight/TextFragment;", "getBestTextFragments", tokenstream, content, TRUE , as.integer(10000000),evalArray=TRUE)
+		for(j in 1:length(frag)) {
+			if (!is.null(frag[[j]]) && frag[[j]]$getScore() >0) {
+				cont.string[[j]] <- frag[[j]]$toString()
+			}
+		}
+		output[[i]]<-cont.string
+    }
+  } else output
   m <- sapply(res, function(o) c(.jfield(o,,"doc"), .jfield(o,,"score")))
   if (length(m)) {
     df <- data.frame(id=as.integer(m[1,]), score=m[2,])
+	df$output <- output
     df$docs <- lapply(df$id, function(i) .convert.doc(s$doc(i)))
     df
   } else data.frame(id=integer(0), score=numeric(0), docs=list())
