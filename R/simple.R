@@ -113,8 +113,7 @@ lucene.query <- function(directory, field, query, version=NA) {
   #Multifield QueryParser
   #fields <- .jarray(c("content","description"))
   #mf <- .jnew("org.apache.lucene.queryparser.classic.MultiFieldQueryParser",version , fields , a2)
-  #qmfp <- .jcast(mf, "org/apache/lucene/queryparser/classic/QueryParser")
-  #q <- .jcall(qmfp, "Lorg/apache/lucene/search/Query;", "parse", query)
+  #q <- .jcall(mf, "Lorg/apache/lucene/search/Query;", "parse", query)
   q <- .jcall(qp, "Lorg/apache/lucene/search/Query;", "parse", query)
   rset <- .jcall(s, "Lorg/apache/lucene/search/TopDocs;", "search", q, .jnull("org/apache/lucene/search/Filter"), 1000L)
   res <- .jfield(rset,,"scoreDocs")
