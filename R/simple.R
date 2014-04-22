@@ -109,12 +109,12 @@ lucene.query <- function(directory, field, query, version=NA) {
   on.exit(.jcall(dr, "V", "close"), TRUE)
   s <- .jnew("org/apache/lucene/search/IndexSearcher", .jcast(dr, "org/apache/lucene/index/IndexReader"))
   a2 <- .jcast(analyzer, "org/apache/lucene/analysis/Analyzer")
-  qp <- .jnew("org.apache.lucene.queryparser.classic.QueryParser", version, as.character(field), a2 )
+  #qp <- .jnew("org.apache.lucene.queryparser.classic.QueryParser", version, as.character(field), a2 )
   #Multifield QueryParser
-  #fields <- .jarray(c("content","description"))
-  #mf <- .jnew("org.apache.lucene.queryparser.classic.MultiFieldQueryParser",version , fields , a2)
-  #q <- .jcall(mf, "Lorg/apache/lucene/search/Query;", "parse", query)
-  q <- .jcall(qp, "Lorg/apache/lucene/search/Query;", "parse", query)
+  fields <- .jarray(c("content","description","notebook_id","starcount","created_at","updated_at","user","avatar_url","user_url"))
+  mf <- .jnew("org.apache.lucene.queryparser.classic.MultiFieldQueryParser",version , fields , a2)
+  q <- .jcall(mf, "Lorg/apache/lucene/search/Query;", "parse", query)
+  #q <- .jcall(qp, "Lorg/apache/lucene/search/Query;", "parse", query)
   rset <- .jcall(s, "Lorg/apache/lucene/search/TopDocs;", "search", q, .jnull("org/apache/lucene/search/Filter"), 1000L)
   res <- .jfield(rset,,"scoreDocs")
   qs <- .jnew("org.apache.lucene.search.highlight.QueryScorer", q, as.character("content"))
@@ -135,11 +135,13 @@ lucene.query <- function(directory, field, query, version=NA) {
 		stream <- .jcall(tokensources, "Lorg/apache/lucene/analysis/TokenStream;", "getAnyTokenStream", reader, rset$scoreDocs[[i]]$doc, "content", document, a2)
 		tokenstream <- .jcast(stream , "org/apache/lucene/analysis/TokenStream")
 		frag <- .jcall(hl, "[Lorg/apache/lucene/search/highlight/TextFragment;", "getBestTextFragments", tokenstream, content, TRUE , as.integer(10000000),evalArray=TRUE)
+		if(length(frag) > 0) {
 		for(j in 1:length(frag)) {
 			if (!is.null(frag[[j]]) && frag[[j]]$getScore() >0) {
 				cont.string[[j]] <- frag[[j]]$toString()
 			}
 		}
+	  }	
 		output[[i]]<-cont.string
     }
   } else output
