@@ -1,4 +1,4 @@
-export(add.document, update.document, delete.documents, lucene.writer, lucene.query, stored, not.stored)
+export(add.document, update.document, delete.documents, lucene.writer, lucene.query, stored, not.stored, LuceneObjects)
 S3method(add.document, LuceneIndexWriter)
 S3method(update.document, LuceneIndexWriter)
 S3method(delete.documents, LuceneIndexWriter)
