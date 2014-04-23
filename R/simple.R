@@ -105,7 +105,6 @@ lucene.query <- function(directory, field, query, version=NA) {
   on.exit(.jcall(lo$index, "V", "close"))
   on.exit(.jcall(lo$reader, "V", "close"), TRUE)
   q <- .jcall(lo$multiparser, "Lorg/apache/lucene/search/Query;", "parse", query)
-  #q <- .jcall(qp, "Lorg/apache/lucene/search/Query;", "parse", query)
   rset <- .jcall(lo$searcher, "Lorg/apache/lucene/search/TopDocs;", "search", q, .jnull("org/apache/lucene/search/Filter"), 1000L)
   res <- .jfield(rset,,"scoreDocs")
   qs <- .jnew("org.apache.lucene.search.highlight.QueryScorer", q, as.character("content"))
@@ -121,7 +120,6 @@ lucene.query <- function(directory, field, query, version=NA) {
 	for(i in 1:length(res)) {
 		document <- .jcall(lo$searcher, "Lorg/apache/lucene/document/Document;", "doc", rset$scoreDocs[[i]]$doc)
 		content <- document$get("content")
-		#tokensources <- .jnew("org.apache.lucene.search.highlight.TokenSources")
 		stream <- .jcall(lo$ts, "Lorg/apache/lucene/analysis/TokenStream;", "getAnyTokenStream", reader, rset$scoreDocs[[i]]$doc, "content", document, a2)
 		tokenstream <- .jcast(stream , "org/apache/lucene/analysis/TokenStream")
 		frag <- .jcall(hl, "[Lorg/apache/lucene/search/highlight/TextFragment;", "getBestTextFragments", tokenstream, content, TRUE , as.integer(10000000),evalArray=TRUE)

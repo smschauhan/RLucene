@@ -1,4 +1,4 @@
 LuceneObjects <- function(){
-luc <- .jnew("Lucene") # create instance of HelloJavaWorld class
-return(luc)
+lo <- .jnew("Lucene") # create instance of Lucene class
+return(lo)
 }
