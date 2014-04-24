@@ -46,11 +46,11 @@ public class Lucene {
 		SA = new StandardAnalyzer(version);
 		MMapDirectory index = new MMapDirectory(new File(path));
 		try {
-      			mapDirectory.setUseUnmap(unmapHack);
+      			index.setUseUnmap(unmapHack);
 		 } catch (Exception e) {
-      			log.warn("Unmap not supported on this JVM, continuing on without setting unmap", e);
+      			System.out.println("Unmap not supported on this JVM, continuing on without setting unmap\n" + e);
     		}
-    		//mapDirectory.setMaxChunkSize(maxChunk);
+    		//index.setMaxChunkSize(maxChunk);
 	
 		reader = DirectoryReader.open(index);
 		searcher = new IndexSearcher(reader);
