@@ -20,8 +20,8 @@ import org.apache.lucene.search.highlight.SimpleSpanFragmenter;
 import org.apache.lucene.search.highlight.TextFragment;
 import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
+import org.apache.lucene.store.MMapDirectory;
+
 
 import org.apache.lucene.util.Version;
 import org.json.JSONObject;
@@ -29,21 +29,29 @@ import org.json.JSONObject;
 public class Lucene {
 	public Analyzer SA;
 	public Version version;
-	public Directory dirIndex;
-	public RAMDirectory index;
+	public MMapDirectory index;
 	public IndexReader reader;
 	public IndexSearcher searcher;
 	public Formatter shtml;
 	String[] fields = {"notebook_id","description","created_at","updated_at","content","starcount","avatar_url","user_url","commited_at","user"};
+	boolean unmapHack = true;
+  	private int maxChunk ;
 	public MultiFieldQueryParser multiparser;
 	public static void main (String[] args) throws Exception {
 	}
 	
 	public Lucene(String path) throws IOException{ 
+		
 		version = Version.LUCENE_47;
 		SA = new StandardAnalyzer(version);
-		dirIndex = FSDirectory.open(new File(path));
-		index = new RAMDirectory(dirIndex);
+		MMapDirectory index = new MMapDirectory(new File(path));
+		try {
+      			mapDirectory.setUseUnmap(unmapHack);
+		 } catch (Exception e) {
+      			log.warn("Unmap not supported on this JVM, continuing on without setting unmap", e);
+    		}
+    		//mapDirectory.setMaxChunkSize(maxChunk);
+	
 		reader = DirectoryReader.open(index);
 		searcher = new IndexSearcher(reader);
 		multiparser = new MultiFieldQueryParser(version, fields, SA);
