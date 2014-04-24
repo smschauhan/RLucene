@@ -21,12 +21,16 @@ import org.apache.lucene.search.highlight.TextFragment;
 import org.apache.lucene.search.highlight.TokenSources;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.RAMDirectory;
+
 import org.apache.lucene.util.Version;
 import org.json.JSONObject;
+
 public class Lucene {
 	public Analyzer SA;
 	public Version version;
-	public Directory index;
+	public Directory dirIndex;
+	public RAMDirectory index;
 	public IndexReader reader;
 	public IndexSearcher searcher;
 	public Formatter shtml;
@@ -38,7 +42,8 @@ public class Lucene {
 	public Lucene(String path) throws IOException{ 
 		version = Version.LUCENE_47;
 		SA = new StandardAnalyzer(version);
-		index = FSDirectory.open(new File(path));
+		dirIndex = FSDirectory.open(new File(path));
+		index = new RAMDirectory(dirIndex);
 		reader = DirectoryReader.open(index);
 		searcher = new IndexSearcher(reader);
 		multiparser = new MultiFieldQueryParser(version, fields, SA);
