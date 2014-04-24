@@ -1,4 +1,6 @@
-LuceneObjects <- function(){
-lo <- .jnew("Lucene") # create instance of Lucene class
-return(lo)
+.session <- new.env(parent=emptyenv())
+
+LuceneObjects <- function(query){
+res <- .jcall(lo, "S", "getResults", query)
+return(res)
 }

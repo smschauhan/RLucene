@@ -1,2 +1,4 @@
-.onLoad <- function(libname, pkgname)
+.onLoad <- function(libname, pkgname) {
   .jpackage(pkgname, lib.loc=libname)
+  .session$lo <- .jnew("Lucene", "/vagrant/work/nanda_indexes/")
+}
