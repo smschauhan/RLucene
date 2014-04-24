@@ -63,7 +63,7 @@ public class Lucene {
         	String content = doc.get("content");
             TokenStream stream = TokenSources.getAnyTokenStream(searcher.getIndexReader(), sd.doc, "content", doc, SA);
             TextFragment[] frag = highlighter.getBestTextFragments(stream, content, true, 10000000);
-              //System.out.println(frag);
+            //System.out.println(frag);
             String x=null;
             if ((frag[0] != null) && (frag[0].getScore() > 0)) {
                      x = frag[0].toString();
@@ -71,5 +71,5 @@ public class Lucene {
             json.put(doc.get("notebook_id"),x);
         }
 		return json.toString();
-	  } 
+	} 
 }
